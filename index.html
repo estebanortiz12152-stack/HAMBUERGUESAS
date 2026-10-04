@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nuestro Menú</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#120a06; --bg2:#1d110a; --card:#1f130c; --fire:#FF5A1F; --cheese:#FFB800;
+  --text:#fff4e6; --muted:#e0cfbf; --faint:#8a7464; --line:rgba(255,90,31,.25);
+  --ember-ring:rgba(255,244,230,.08); --out:cubic-bezier(.23,1,.32,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{overflow-x:clip}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+body{
+  -webkit-font-smoothing:antialiased;font-family:'Poppins',sans-serif;color:var(--text);min-height:100vh;overflow-x:hidden;
+  background:
+    radial-gradient(ellipse at 50% 110%,rgba(255,90,31,.28),transparent 60%),
+    radial-gradient(circle at 15% 20%,rgba(255,184,0,.06),transparent 40%),
+    repeating-radial-gradient(circle at 30% 40%,rgba(255,255,255,.012) 0 2px,transparent 2px 6px),
+    var(--bg);
+}
+button{font-family:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--cheese);outline-offset:3px}
+.card:focus-visible{outline-offset:4px}
+
+/* Chispas */
+#sparks{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.spark{position:absolute;bottom:-10px;width:4px;height:4px;border-radius:50%;
+  background:var(--cheese);box-shadow:0 0 8px 2px var(--fire);opacity:0;
+  animation:rise linear infinite}
+@keyframes rise{
+  0%{transform:translate(0,0) scale(1);opacity:0}
+  10%{opacity:1}
+  100%{transform:translate(var(--dx),-105vh) scale(.2);opacity:0}
+}
+
+.menu{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:64px 20px 120px}
+
+/* Título */
+.title{display:flex;align-items:center;justify-content:center;gap:20px;
+  font-family:'Bebas Neue',sans-serif;font-size:clamp(2.6rem,7vw,4.8rem);letter-spacing:3px;line-height:1;text-align:center}
+.title span{color:var(--cheese);text-shadow:0 0 24px rgba(255,184,0,.4)}
+.title::before,.title::after{content:"";flex:0 1 140px;height:3px;border-radius:3px;
+  background:linear-gradient(90deg,transparent,var(--fire))}
+.title::after{transform:scaleX(-1)}
+.subtitle{text-align:center;color:var(--muted);margin:12px 0 36px;font-size:.95rem}
+
+/* Pestañas */
+.tabs{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:40px}
+.tab{background:transparent;color:var(--text);border:2px solid var(--line);padding:10px 22px;border-radius:999px;
+  font-family:'Bebas Neue',sans-serif;font-size:1.25rem;letter-spacing:1.5px;transition:background .2s var(--out),border-color .2s,color .2s,box-shadow .2s,transform .12s}
+.tab:hover{border-color:var(--fire);color:var(--cheese)}
+.tab.active{background:linear-gradient(135deg,var(--fire),#ff7a2f);border-color:transparent;color:#fff;box-shadow:0 6px 24px rgba(255,90,31,.45)}
+
+/* Cuadrícula */
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px}
+.card{min-width:0}
+@media(max-width:1024px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.grid{grid-template-columns:minmax(0,1fr)}.tab{padding:8px 16px;font-size:1.1rem}}
+
+.card{background:linear-gradient(180deg,var(--card),#160d08);border:1px solid rgba(255,255,255,.06);border-radius:20px;
+  padding:18px;display:flex;flex-direction:column;cursor:pointer;position:relative;
+  transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s,border-color .35s;
+  opacity:0;transform:translateY(30px);animation:cardIn .55s cubic-bezier(.2,.8,.2,1) forwards}
+@keyframes cardIn{to{opacity:1;transform:translateY(0)}}
+.card:hover{transform:translateY(-8px);border-color:rgba(255,90,31,.6);
+  box-shadow:0 0 0 1px rgba(255,90,31,.4),0 0 34px rgba(255,90,31,.45),0 20px 40px rgba(0,0,0,.5)}
+.card .img-wrap{aspect-ratio:4/3;border-radius:14px;overflow:hidden;margin-bottom:14px;
+  background:radial-gradient(circle at 50% 60%,rgba(255,90,31,.25),transparent 70%)}
+.card .img-wrap{position:relative}.card .img-wrap::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);pointer-events:none}
+.card img{width:100%;height:100%;object-fit:cover;transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+.card:hover img{transform:scale(1.1) rotate(-4deg)}
+.card .tags{position:absolute;top:26px;left:26px;display:flex;gap:6px;flex-wrap:wrap;max-width:80%}
+.card h3{text-wrap:balance;font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:1px;line-height:1.1}
+.card p{color:var(--muted);font-size:.85rem;margin:4px 0 14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .bottom{margin-top:auto;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.price,.total,.d-row b,.cart .count,.qty output,.mini span{font-variant-numeric:tabular-nums}
+.price{font-family:'Bebas Neue',sans-serif;font-size:1.9rem;color:var(--cheese)}
+.price small{font-size:.9rem;color:var(--muted);margin-left:3px}
+.btn-det{background:transparent;border:2px solid var(--fire);color:var(--text);padding:8px 14px;border-radius:10px;font-weight:600;font-size:.8rem;transition:background .2s var(--out),transform .12s}
+.card:hover .btn-det,.btn-det:hover{background:var(--fire)}
+.tab:active,.btn-det:active,.wa:active,.cart:active,.qty button:active,.mini button:active{transform:scale(.97)}
+
+.tag{font-size:.7rem;font-weight:600;padding:4px 10px;border-radius:999px;background:rgba(18,10,6,.85);border:1px solid var(--line);backdrop-filter:blur(4px);white-space:nowrap}
+.tag.picante{border-color:#ff3b1f;color:#ff8a6b}
+.tag.vendido{border-color:var(--cheese);color:var(--cheese)}
+.tag.nuevo{border-color:#4ade80;color:#86efac}
+.tag.veg{border-color:#84cc16;color:#bef264}
+
+/* Modal */
+.overlay{position:fixed;inset:0;z-index:50;background:rgba(10,5,2,.6);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;visibility:hidden;transition:opacity .35s,visibility .35s}
+.overlay.open{opacity:1;visibility:visible}
+.modal{background:linear-gradient(160deg,#24150c,#140b06);border:1px solid rgba(255,90,31,.35);border-radius:24px;
+  width:min(1000px,100%);max-height:92vh;overflow:auto;display:grid;grid-template-columns:1fr 1fr;position:relative;
+  box-shadow:0 0 60px rgba(255,90,31,.25),0 30px 80px rgba(0,0,0,.6);
+  transform-origin:var(--ox,50%) var(--oy,50%);transform:scale(.9);opacity:0;
+  transition:transform .4s var(--out),opacity .25s var(--out)}
+.overlay.open .modal{transform:scale(1);opacity:1}
+@media(max-width:820px){.modal{grid-template-columns:minmax(0,1fr)}
+}
+.modal{overflow-x:hidden}.layer .lbl{max-width:80px;overflow:hidden;text-overflow:ellipsis}
+.close{position:absolute;top:14px;right:14px;z-index:3;width:42px;height:42px;border-radius:50%;border:1px solid var(--line);
+  background:rgba(18,10,6,.8);color:var(--text);font-size:1.3rem;transition:.25s}
+.close:hover{background:var(--fire);transform:rotate(90deg)}
+
+.m-visual{padding:30px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 50% 55%,rgba(255,90,31,.3),transparent 65%);min-height:380px;gap:16px}
+.m-photo{width:70%;max-width:260px;aspect-ratio:1;border-radius:50%;object-fit:cover;border:3px solid rgba(255,184,0,.4);box-shadow:0 0 30px rgba(255,90,31,.4)}
+.m-hint{font-size:.75rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
+
+/* Despiece */
+.stack{position:relative;width:240px;min-height:240px;transition:padding-top .5s var(--out);display:flex;flex-direction:column-reverse;align-items:center;justify-content:flex-start;padding-bottom:10px}
+.layer{position:relative;width:200px;margin-top:-6px;transition:transform .7s cubic-bezier(.2,.9,.25,1.2);
+  transform:translateY(var(--ty,0))}
+.stack.exploded .layer{--gap:14px;transform:translateY(calc(var(--i) * var(--gap) * -1))}
+.layer .lbl{position:absolute;left:100%;top:50%;transform:translate(10px,-50%);white-space:nowrap;font-size:.7rem;color:var(--muted);opacity:0;transition:opacity .4s .5s}
+.stack.exploded .layer .lbl{opacity:1}
+.l-bunTop{height:52px;border-radius:100px 100px 14px 14px;background:radial-gradient(circle at 30% 30%,#f0a64a,#c56d1c 70%);
+  box-shadow:inset 0 -6px 0 #a5571a}
+.l-bunTop::after{content:"";position:absolute;inset:10px 30px auto;height:20px;
+  background:radial-gradient(ellipse 3px 2px,#ffe9b8 60%,transparent 62%) 0 0/22px 10px}
+.l-bunBot{height:30px;border-radius:10px 10px 30px 30px;background:linear-gradient(#d88a37,#b8651d)}
+.l-patty{height:26px;border-radius:14px;background:radial-gradient(circle at 40% 40%,#6b3a1e,#3d1d0b);box-shadow:inset 0 3px 0 rgba(255,255,255,.08)}
+.l-chicken{height:28px;border-radius:16px;background:radial-gradient(circle at 40% 40%,#e9a64c,#b0661f);box-shadow:inset 0 0 0 3px #c97b2a}
+.l-veggie{height:26px;border-radius:14px;background:radial-gradient(circle at 40% 40%,#8a9a3a,#4f5c1c)}
+.l-cheese{height:10px;width:210px;background:var(--cheese);clip-path:polygon(0 0,100% 0,100% 40%,88% 100%,78% 40%,55% 40%,45% 100%,35% 40%,12% 40%,6% 100%,0 40%)}
+.l-lettuce{height:12px;width:215px;background:#5fbf3a;border-radius:50%;clip-path:polygon(0 50%,5% 0,12% 60%,20% 0,28% 60%,36% 0,44% 60%,52% 0,60% 60%,68% 0,76% 60%,84% 0,92% 60%,100% 30%,100% 100%,0 100%)}
+.l-tomato{height:12px;width:190px;background:#e33b2a;border-radius:8px;box-shadow:inset 0 0 0 3px #b8261a}
+.l-onion{height:8px;width:180px;border-radius:8px;background:repeating-linear-gradient(90deg,#b5568f 0 20px,#e7b3d6 20px 24px)}
+.l-bacon{height:10px;width:205px;border-radius:4px;background:repeating-linear-gradient(90deg,#a3361f 0 14px,#e9a089 14px 20px)}
+.l-pickles{height:8px;width:160px;background:radial-gradient(circle,#7a9a2a 55%,transparent 58%) 0 0/26px 8px}
+.l-jalapeno{height:8px;width:170px;background:radial-gradient(circle,#2f9e44 55%,transparent 58%) 0 0/24px 8px}
+.l-sauce{height:6px;width:185px;border-radius:6px;background:#f2c96b}
+.l-avocado{height:10px;width:180px;border-radius:8px;background:linear-gradient(#a7c957,#6a994e)}
+/* despiece genérico (emoji) */
+.l-egg{height:14px;width:190px;border-radius:50%;background:radial-gradient(circle at 50% 50%,#ffb800 0 16%,#fffaf0 18% 100%)}
+.l-mushroom{height:9px;width:175px;background:radial-gradient(ellipse 11px 5px,#a47551 70%,transparent 72%) 0 0/24px 9px}
+.l-pineapple{height:10px;width:185px;border-radius:6px;background:repeating-linear-gradient(90deg,#f6c945 0 16px,#c98a16 16px 18px)}
+.layer.new{animation:dropIn .55s cubic-bezier(.3,1.5,.5,1)}
+@keyframes dropIn{0%{opacity:0;translate:0 -60px}100%{opacity:1;translate:0 0}}
+.layer.bye{opacity:0;translate:30px 0;transition:opacity .25s,translate .25s}
+.card{--mx:50%;--my:50%}
+.card::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s;
+  background:radial-gradient(260px circle at var(--mx) var(--my),rgba(255,90,31,.22),transparent 60%)}
+
+.flyer{position:fixed;z-index:70;width:70px;height:70px;border-radius:50%;object-fit:cover;pointer-events:none;box-shadow:0 0 24px rgba(255,90,31,.7);
+  transition:transform .75s cubic-bezier(.5,-.3,.7,1),opacity .75s}
+.sizzle{display:block;font-size:.72rem;color:var(--cheese);margin-top:2px;min-height:1em;letter-spacing:.5px}
+.emoji-stack{display:flex;flex-direction:column;align-items:center;gap:0;transition:gap .7s cubic-bezier(.2,.9,.25,1.2)}
+.emoji-stack.exploded{gap:10px}
+.emoji-stack div{font-size:2.6rem;line-height:1;filter:drop-shadow(0 4px 8px rgba(0,0,0,.5))}
+
+.m-info{padding:34px 30px}
+.m-info h2{font-family:'Bebas Neue',sans-serif;font-size:2.6rem;letter-spacing:1px;line-height:1;padding-right:40px}
+.m-info .desc{text-wrap:pretty;color:var(--muted);margin:8px 0 14px;font-size:.92rem}
+.m-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
+.sect{font-family:'Bebas Neue',sans-serif;letter-spacing:1.5px;color:var(--fire);font-size:1.2rem;margin:18px 0 8px}
+.ings{display:grid;grid-template-columns:repeat(2,1fr);gap:6px 12px;list-style:none;font-size:.85rem}
+.ings li{display:flex;gap:8px;align-items:center;opacity:0;transform:translateX(-10px);animation:ingIn .4s forwards}
+@keyframes ingIn{to{opacity:1;transform:none}}
+.facts{display:flex;gap:10px;flex-wrap:wrap}
+.fact{flex:1 1 90px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:10px;text-align:center;font-size:.75rem;color:var(--muted)}
+.fact b{display:block;color:var(--text);font-size:.95rem}
+.sizes{display:flex;gap:8px}
+.sizes label{flex:1}
+.sizes input,.extras input{position:absolute;opacity:0;pointer-events:none}
+.sizes span{display:block;text-align:center;padding:10px 6px;border-radius:12px;border:2px solid var(--line);font-size:.85rem;font-weight:600;transition:.2s;cursor:pointer}
+.sizes span small{display:block;font-weight:400;color:var(--muted);font-size:.7rem}
+.sizes input:checked+span{border-color:var(--fire);background:rgba(255,90,31,.15);color:var(--cheese)}
+.sizes input:focus-visible+span,.extras input:focus-visible+span{outline:2px solid var(--cheese)}
+.extras{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.extras label span{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.1);font-size:.82rem;cursor:pointer;transition:.2s}
+.extras label span::before{content:"";width:16px;height:16px;border-radius:5px;border:2px solid var(--muted);flex:none;transition:.2s}
+.extras label span em{margin-left:auto;font-style:normal;color:var(--cheese)}
+.extras input:checked+span{border-color:var(--fire);background:rgba(255,90,31,.12)}
+.extras input:checked+span::before{background:var(--fire) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8l3 3 7-7' stroke='white' stroke-width='2.5' fill='none'/%3E%3C/svg%3E") center/12px no-repeat;border-color:var(--fire)}
+.combo{grid-column:1/-1}
+.combo span{background:linear-gradient(90deg,rgba(255,184,0,.08),transparent)}
+
+.buy{position:sticky;bottom:0;margin:22px -30px -34px;padding:18px 30px;background:linear-gradient(180deg,rgba(20,11,6,.85),#140b06);backdrop-filter:blur(6px);
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;border-top:1px solid var(--line)}
+.total{font-family:'Bebas Neue',sans-serif;font-size:2.4rem;color:var(--cheese);min-width:120px}
+.total small{display:block;font-family:'Poppins';font-size:.7rem;color:var(--muted);line-height:1}
+.qty{display:flex;align-items:center;border:2px solid var(--line);border-radius:12px;overflow:hidden}
+.qty button{width:38px;height:42px;background:transparent;border:0;color:var(--text);font-size:1.3rem;transition:.2s}
+.qty button:hover{background:var(--fire)}
+.qty output{width:34px;text-align:center;font-weight:700}
+.add{flex:1;min-width:180px;height:50px;border:0;border-radius:14px;color:#fff;font-weight:700;font-size:1rem;position:relative;overflow:visible;
+  background:linear-gradient(135deg,var(--fire),#ff8a2f);box-shadow:0 8px 26px rgba(255,90,31,.45);transition:transform .2s,background .3s}
+.add:hover{transform:translateY(-2px)}
+.add:active{transform:scale(.97)}
+.add.ok{background:linear-gradient(135deg,#22c55e,#16a34a);box-shadow:0 8px 26px rgba(34,197,94,.45)}
+.add .check{display:inline-block;animation:pop .45s cubic-bezier(.2,.9,.3,1.6)}
+@keyframes pop{0%{transform:scale(.6);opacity:0}100%{transform:scale(1)}}
+.burst{position:absolute;width:6px;height:6px;border-radius:50%;background:var(--cheese);box-shadow:0 0 6px var(--fire);pointer-events:none;
+  left:50%;top:50%;animation:burst .7s ease-out forwards}
+@keyframes burst{to{transform:translate(var(--bx),var(--by)) scale(0);opacity:0}}
+
+/* Carrito */
+.cart{position:fixed;right:22px;bottom:22px;z-index:40;width:64px;height:64px;border-radius:50%;border:0;
+  background:linear-gradient(135deg,var(--fire),#ff8a2f);color:#fff;font-size:1.7rem;box-shadow:0 10px 30px rgba(255,90,31,.5)}
+.cart .count{position:absolute;top:-4px;right:-4px;min-width:26px;height:26px;padding:0 6px;border-radius:999px;background:var(--cheese);color:#120a06;font-size:.8rem;font-weight:700;display:grid;place-items:center;border:2px solid var(--bg)}
+.cart.bump{animation:bump .6s cubic-bezier(.3,1.6,.5,1)}
+@keyframes bump{0%{transform:scale(1)}30%{transform:scale(1.25) rotate(-8deg)}60%{transform:scale(.92) rotate(4deg)}100%{transform:scale(1)}}
+.toast{position:fixed;right:22px;bottom:100px;z-index:40;background:#1f130c;border:1px solid var(--fire);padding:10px 16px;border-radius:12px;font-size:.85rem;
+  opacity:0;transform:translateY(10px);transition:.3s;pointer-events:none}
+.toast.show{opacity:1;transform:none}
+
+.drawer-bg{position:fixed;inset:0;z-index:60;background:rgba(10,5,2,.6);backdrop-filter:blur(6px);opacity:0;visibility:hidden;transition:.3s}
+.drawer-bg.open{opacity:1;visibility:visible}
+.drawer{position:fixed;top:0;right:0;z-index:61;height:100%;width:min(440px,100%);background:linear-gradient(180deg,#24150c,#140b06);
+  border-left:1px solid var(--line);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .4s cubic-bezier(.2,.9,.25,1);box-shadow:-20px 0 60px rgba(0,0,0,.5)}
+.drawer.open{transform:none}
+.d-head{display:flex;align-items:center;justify-content:space-between;padding:20px 22px;border-bottom:1px solid var(--line)}
+.d-head h3{font-family:'Bebas Neue';font-size:2rem;letter-spacing:1px}.d-head h3 span{color:var(--cheese)}
+.d-head .close{position:static}
+.d-items{flex:1;overflow:auto;padding:14px 22px}
+.d-foot{padding:16px 22px;border-top:1px solid var(--line);overflow:auto;max-height:62vh}
+.d-item{display:grid;grid-template-columns:60px 1fr auto;gap:12px;padding:12px 0;border-bottom:1px dashed rgba(255,255,255,.08);animation:ingIn .3s}
+.d-item img{width:60px;height:60px;border-radius:12px;object-fit:cover}
+.d-item h4{font-size:.9rem}.d-item small{display:block;color:var(--muted);font-size:.72rem;line-height:1.35}
+.d-item .r{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.d-item .r b{color:var(--cheese)}
+.mini{display:flex;align-items:center;border:1px solid var(--line);border-radius:8px}
+.mini button{width:34px;height:34px;background:none;border:0;color:var(--text)}
+.mini button:hover{background:var(--fire)}.mini span{min-width:22px;text-align:center;font-size:.85rem}
+.del{background:none;border:0;padding:6px 0;color:var(--muted);font-size:.72rem;text-decoration:underline}
+.d-empty{text-align:center;color:var(--muted);padding:60px 10px}.d-empty div{font-size:3rem;margin-bottom:10px}
+.d-mode{display:flex;gap:8px;margin-bottom:10px}.d-mode label{flex:1}
+.d-mode input{position:absolute;opacity:0}
+.d-mode span{display:block;text-align:center;padding:9px;border-radius:10px;border:2px solid var(--line);font-size:.85rem;cursor:pointer}
+.d-mode input:checked+span{border-color:var(--fire);background:rgba(255,90,31,.15)}
+.d-in{width:100%;margin-bottom:8px;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.3);color:var(--text);font:inherit;font-size:.85rem;resize:vertical}
+.d-in:focus{outline:none;border-color:var(--fire)}
+.d-in option{background:#1f130c}
+.d-row{display:flex;justify-content:space-between;font-size:.9rem;margin:4px 0;color:var(--muted)}
+.d-total{font-family:'Bebas Neue';font-size:1.8rem;color:var(--text)}.d-total b{color:var(--cheese)}
+.d-err{color:#ff8a6b;font-size:.8rem;min-height:1em}
+.wa{width:100%;height:52px;border:0;border-radius:14px;background:linear-gradient(135deg,#25D366,#128C7E);color:#fff;font-weight:700;font-size:1rem;margin-top:6px;box-shadow:0 8px 24px rgba(37,211,102,.35);transition:.2s}
+.wa:hover{transform:translateY(-2px)}
+.vaciar{width:100%;background:none;border:0;color:var(--muted);font-size:.8rem;margin-top:10px;text-decoration:underline}
+
+@media(max-width:820px){
+  .m-visual{min-height:0;padding:56px 16px 12px;flex-direction:row;flex-wrap:wrap}
+  .m-photo{width:110px}
+  .stack{transform:scale(.72);transform-origin:center;margin:-30px -20px}
+  .m-info{padding:24px 18px}.buy{margin:20px -18px -24px;padding:14px 18px}
+  .m-info h2{font-size:2rem}}
+
+/* ===== BOLDER ===== */
+.kicker{text-align:center;font-size:.78rem;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--fire);margin-bottom:10px}
+.title{flex-wrap:wrap;column-gap:.25em;font-size:clamp(3rem,13vw,8.5rem);letter-spacing:1px;line-height:.85}
+.title em{font-style:normal;color:transparent;-webkit-text-stroke:2px var(--text)}
+.title span{background:linear-gradient(180deg,#ffe27a 0%,var(--cheese) 45%,var(--fire) 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:none;filter:drop-shadow(0 0 28px rgba(255,140,0,.45))}
+.ticker{margin:28px -20px 40px;transform:rotate(-2deg);background:var(--fire);color:#120a06;overflow:hidden;box-shadow:0 10px 40px rgba(255,90,31,.35)}
+.ticker-track{display:flex;gap:28px;width:max-content;padding:12px 0;font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:2px;white-space:nowrap;animation:tick 28s linear infinite}
+@keyframes tick{to{transform:translateX(-50%)}}
+.card.feat{grid-column:span 2;grid-row:span 2;padding:0;overflow:hidden;min-height:520px;justify-content:flex-end;border-color:rgba(255,184,0,.35)}
+.card.feat .img-wrap{position:absolute;inset:0;aspect-ratio:auto;border-radius:0;margin:0}
+.card.feat .img-wrap::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,transparent 30%,rgba(18,10,6,.75) 62%,#120a06 100%)}
+.card.feat .tags{top:auto;bottom:auto;top:58px;left:24px}
+.card.feat h3,.card.feat p,.card.feat .bottom{position:relative;z-index:2;padding:0 28px}
+.card.feat h3{font-size:clamp(2.4rem,4.5vw,4rem);line-height:.9;margin-top:auto}
+.card.feat .bottom{margin-top:16px}
+.card.feat p{white-space:normal;font-size:1rem;color:var(--text);opacity:.85;max-width:44ch}
+.card.feat .bottom{padding-bottom:28px}
+.card.feat .price{font-size:4rem;line-height:1}
+.card.feat .btn-det{background:var(--fire);padding:14px 22px;font-size:.95rem}
+.feat-badge{position:absolute;z-index:3;top:20px;left:24px;background:var(--cheese);color:#120a06;font-family:'Bebas Neue',sans-serif;font-size:1.15rem;letter-spacing:1.5px;padding:4px 14px;border-radius:6px;transform:rotate(-3deg)}
+.card:not(.feat) .price{background:var(--cheese);color:#120a06;padding:0 10px;border-radius:8px;transform:rotate(-3deg);display:inline-block;font-size:1.7rem}
+.card:not(.feat) .price small{color:#120a06;opacity:.7}
+.title::before,.title::after{display:none}
+@media(max-width:600px){.card.feat{grid-column:span 1;grid-row:span 1;min-height:500px}.card.feat .price{font-size:3rem}.ticker-track{font-size:1.2rem}}
+
+.more{grid-column:1/-1}
+.more summary{cursor:pointer;list-style:none;padding:10px 12px;border-radius:12px;border:1px dashed var(--line);font-size:.82rem;font-weight:600;color:var(--cheese);text-align:center}
+.more summary::-webkit-details-marker{display:none}
+.more[open] summary{margin-bottom:8px}
+.facts-line{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.8rem;color:var(--muted);margin:14px 0 4px}
+.status i{flex:none}.status{display:flex;align-items:center;justify-content:center;gap:8px;max-width:520px;font-size:.82rem;color:var(--text);margin:0 auto 18px;text-align:left}
+.status i{width:9px;height:9px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.2)}
+.status.off i{background:#ef4444;box-shadow:0 0 0 4px rgba(239,68,68,.2)}
+.card .price small{opacity:1}
+@media(max-width:600px){
+  .menu{padding-top:36px}
+  .kicker{display:none}
+  .title{font-size:2.9rem}
+  .subtitle{margin:8px 0 0;font-size:.85rem}
+  .ticker{margin:20px -20px 24px}
+  .tabs{flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto;margin:0 -20px 28px;padding:4px 20px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{flex:none}
+  .status{font-size:.75rem}
+}
+
+/* Rendimiento: con modal o carrito abierto se pausa todo lo de fondo */
+body.lock{overflow:hidden}
+body.lock #sparks,body.lock .ticker-track,body.lock .card{animation-play-state:paused}
+body.lock #sparks{display:none}
+.overlay{overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.modal{overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y}
+.overlay:not(.open) .modal{pointer-events:none}
+.drawer:not(.open){visibility:hidden}
+@media(max-width:820px){
+  .overlay{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(10,5,2,.9);padding:12px}
+  .drawer-bg{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(10,5,2,.85)}
+  .modal{max-height:calc(100dvh - 24px)}
+}
+
+/* ===== Modal: distribución sin amontonar ===== */
+@media(min-width:821px){
+  .modal{height:min(760px,92vh);overflow:hidden}
+  .m-visual{overflow:hidden}
+  .m-info{overflow-y:auto;overscroll-behavior:contain;padding-bottom:0}
+}
+.buy{flex-wrap:nowrap;gap:12px;padding:12px 30px;margin-top:20px}
+.total{font-size:1.9rem;min-width:0;line-height:1}
+.total small{margin-bottom:2px}
+.sizzle{position:absolute;bottom:calc(100% + 6px);left:30px;white-space:nowrap;background:#1f130c;border:1px solid var(--line);border-radius:999px;padding:3px 10px}
+.sizzle:empty{display:none}
+.buy{position:sticky}
+.qty button{width:36px;height:40px}
+.add{height:46px;min-width:0;font-size:.95rem}
+@media(max-width:820px){
+  .buy{padding:10px 18px}
+  .sizzle{left:18px}
+}
+@media(max-width:480px){
+  .extras{grid-template-columns:1fr}
+  .total{font-size:1.6rem}
+  .qty button{width:32px}
+  .qty output{width:26px}
+  .add{font-size:.85rem;padding:0 10px}
+}
+
+@media (prefers-reduced-motion: reduce){
+  .ticker-track{animation:none}
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}
+  .card,.modal,.drawer,.layer,.toast{transition-property:opacity!important}
+  .card:hover,.card:hover img{transform:none}
+  #sparks{display:none}
+  .card{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+<div id="sparks" aria-hidden="true"></div>
+
+<main id="main"><section class="menu" id="menu" aria-labelledby="titulo">
+  <p class="kicker">🔥 Parrilla al carbón · Desde la brasa a tu mesa</p>
+  <h1 class="title" id="titulo"><em>Nuestro</em> <span>Menú</span></h1>
+  <p class="subtitle">Hechas al carbón, con ingredientes frescos todos los días</p>
+  <div class="ticker" aria-hidden="true"><div class="ticker-track">
+    <span>100% carne de res</span><span>★</span><span>Pan brioche horneado diario</span><span>★</span><span>Asadas al carbón</span><span>★</span><span>Queso que se derrite</span><span>★</span>
+    <span>100% carne de res</span><span>★</span><span>Pan brioche horneado diario</span><span>★</span><span>Asadas al carbón</span><span>★</span><span>Queso que se derrite</span><span>★</span>
+  </div></div>
+  <p class="status" id="status"></p>
+  <nav class="tabs" id="tabs" role="tablist"></nav>
+  <div class="grid" id="grid" role="tabpanel" aria-live="polite"></div>
+</section></main>
+
+<div class="overlay" id="overlay">
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="mName"></div>
+</div>
+
+<button class="cart" id="cart" aria-label="Abrir carrito" aria-controls="drawer">🛒<span class="count" id="count">0</span></button>
+<div class="toast" id="toast"></div>
+
+<div class="drawer-bg" id="drawerBg"></div>
+<div class="drawer" id="drawer" aria-label="Tu pedido" role="dialog" aria-modal="true">
+  <div class="d-head"><h3>Tu <span>pedido</span></h3><button class="close" id="dClose" aria-label="Cerrar">✕</button></div>
+  <div class="d-items" id="dItems"></div>
+  <div class="d-foot" id="dFoot">
+    <div class="d-mode">
+      <label><input type="radio" name="modo" value="Recoger en sucursal" checked><span>🏪 Recoger</span></label>
+      <label><input type="radio" name="modo" value="Envío a domicilio"><span>🛵 A domicilio</span></label>
+    </div>
+    <input class="d-in" id="cNombre" placeholder="Tu nombre *" autocomplete="name">
+    <input class="d-in" id="cTel" placeholder="Teléfono" type="tel" autocomplete="tel">
+    <textarea class="d-in" id="cDir" rows="2" placeholder="Dirección completa y referencias *" hidden></textarea>
+    <select class="d-in" id="cPago"><option>Efectivo</option><option>Tarjeta (terminal)</option><option>Transferencia</option></select>
+    <input class="d-in" id="cPaga" placeholder="¿Con cuánto pagas? (para cambio)" inputmode="numeric">
+    <textarea class="d-in" id="cNotas" rows="2" placeholder="Notas: sin pepinillos, término de la carne…"></textarea>
+    <div class="d-row"><span>Subtotal</span><b id="dSub">$0</b></div>
+    <div class="d-row" id="dEnvRow" hidden><span>Envío</span><b id="dEnv">$0</b></div>
+    <div class="d-row d-total"><span>Total</span><b id="dTot">$0</b></div>
+    <p class="d-err" id="dErr"></p>
+    <button class="wa" id="wa">Enviar pedido por WhatsApp</button>
+    <button class="vaciar" id="vaciar">Vaciar carrito</button>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   DATOS DEL MENÚ — edita aquí precios, productos e imágenes.
+   - img: pon la ruta/URL de tu foto (ej. "fotos/clasica.jpg").
+          Si la dejas vacía "", se genera un placeholder automático.
+   - layers (solo hamburguesas): capas del despiece, de ABAJO hacia ARRIBA.
+       Disponibles: bunBot, patty, chicken, veggie, cheese, bacon, lettuce,
+       tomato, onion, pickles, jalapeno, sauce, avocado, bunTop
+   - stack (otros productos): emojis para el despiece, de arriba a abajo.
+   - tags: "picante", "vendido", "nuevo", "veg"
+   - custom: true = muestra tamaño/extras/combo (hamburguesas)
+   ===================================================================== */
+/* ===== CONFIGURACIÓN DE WHATSAPP =====
+   Número con código de país, sin +, espacios ni guiones. México: 52 + 10 dígitos */
+const WHATSAPP = "5210000000000";
+const NEGOCIO = "Mi Hamburguesería";
+const COSTO_ENVIO = 30;   // costo de envío a domicilio (0 = gratis)
+
+const CATEGORIAS = [
+  { id:"hamburguesas", nombre:"Hamburguesas" },
+  { id:"combos",       nombre:"Combos" },
+  { id:"snacks",       nombre:"Papas y Snacks" },
+  { id:"bebidas",      nombre:"Bebidas" },
+  { id:"postres",      nombre:"Postres" },
+];
+
+const EXTRAS_VISIBLES = 4;   // extras que se ven sin abrir "Ver más"
+/* Horario (24 h) y entrega — se muestra "Abierto / Cerrado" arriba del menú */
+const HORA_ABRE = 13, HORA_CIERRA = 23;
+const TIEMPO_ENTREGA = "30–40 min";
+const ZONA_ENTREGA = "Envío a domicilio en tu colonia";
+
+const OPCIONES = {
+  tamanos: [ { nombre:"Sencilla", extra:0 }, { nombre:"Doble", extra:35 }, { nombre:"Triple", extra:65 } ],
+  extras:  [ { nombre:"Queso extra", precio:15, emoji:"🧀" }, { nombre:"Tocino", precio:20, emoji:"🥓" },
+             { nombre:"Aguacate", precio:25, emoji:"🥑" }, { nombre:"Jalapeños", precio:10, emoji:"🌶️" },
+             { nombre:"Huevo estrellado", precio:18, emoji:"🍳" }, { nombre:"Aros de cebolla", precio:20, emoji:"🧅" },
+             { nombre:"Champiñones", precio:18, emoji:"🍄" }, { nombre:"Piña asada", precio:15, emoji:"🍍" },
+             { nombre:"Cebolla caramelizada", precio:15, emoji:"🧅" }, { nombre:"Chile chipotle", precio:10, emoji:"🔥" },
+             { nombre:"Carne extra 150 g", precio:45, emoji:"🥩" }, { nombre:"Salsa de queso", precio:15, emoji:"🫕" },
+             { nombre:"Pan sin gluten", precio:20, emoji:"🍞" }, { nombre:"Sin cebolla", precio:0, emoji:"🚫" } ],
+  combo:   { nombre:"Hazlo combo (papas + refresco)", precio:45 },
+};
+
+const PRODUCTOS = [
+  // ---------- HAMBURGUESAS ----------
+  { nombre:"Hamburguesa Clásica", categoria:"hamburguesas", precio:119, img:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=800&q=80", emoji:"🍔",
+    descripcion:"Carne de res al carbón, queso y vegetales frescos.",
+    ingredientes:[["🍞","Pan brioche"],["🥩","Carne de res 150 g"],["🧀","Queso americano"],["🥬","Lechuga"],["🍅","Jitomate"],["🧅","Cebolla morada"],["🥒","Pepinillos"],["🥫","Salsa de la casa"]],
+    layers:["bunBot","sauce","patty","cheese","pickles","onion","tomato","lettuce","bunTop"],
+    tags:["vendido"], calorias:620, alergenos:"Gluten, lácteos", tiempo:"10 min", custom:true },
+  { nombre:"Hamburguesa Doble Queso", categoria:"hamburguesas", precio:149, img:"https://images.unsplash.com/photo-1553979459-d2229ba7433b?auto=format&fit=crop&w=800&q=80", emoji:"🍔",
+    descripcion:"Dos carnes, doble cheddar derretido y salsa de la casa.",
+    ingredientes:[["🍞","Pan brioche"],["🥩","2 carnes de res 150 g"],["🧀","Doble queso cheddar"],["🥓","Tocino"],["🥬","Lechuga"],["🍅","Jitomate"],["🧅","Cebolla morada"],["🥒","Pepinillos"],["🥫","Salsa de la casa"]],
+    layers:["bunBot","sauce","patty","cheese","patty","cheese","bacon","pickles","onion","tomato","lettuce","bunTop"],
+    tags:["vendido"], calorias:980, alergenos:"Gluten, lácteos", tiempo:"12 min", custom:true },
+  { nombre:"Hamburguesa BBQ Tocino", categoria:"hamburguesas", precio:169, img:"https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?auto=format&fit=crop&w=800&q=80", emoji:"🍔",
+    descripcion:"Tocino crujiente, aros de cebolla y salsa BBQ ahumada.",
+    ingredientes:[["🍞","Pan brioche"],["🥩","Carne de res 180 g"],["🥓","Tocino ahumado"],["🧀","Queso gouda"],["🧅","Aros de cebolla"],["🍖","Salsa BBQ"]],
+    layers:["bunBot","sauce","patty","cheese","bacon","bacon","onion","lettuce","bunTop"],
+    tags:["nuevo"], calorias:1050, alergenos:"Gluten, lácteos", tiempo:"12 min", custom:true },
+  { nombre:"Hamburguesa de Pollo Crujiente", categoria:"hamburguesas", precio:139, img:"https://images.unsplash.com/photo-1606755962773-d324e0a13086?auto=format&fit=crop&w=800&q=80", emoji:"🍔",
+    descripcion:"Pechuga empanizada crujiente con mayo de chipotle.",
+    ingredientes:[["🍞","Pan brioche"],["🍗","Pechuga empanizada"],["🧀","Queso manchego"],["🥬","Lechuga"],["🍅","Jitomate"],["🌶️","Mayo chipotle"]],
+    layers:["bunBot","sauce","chicken","cheese","tomato","lettuce","bunTop"],
+    tags:[], calorias:760, alergenos:"Gluten, lácteos, huevo", tiempo:"11 min", custom:true },
+  { nombre:"Hamburguesa Picante Jalapeño", categoria:"hamburguesas", precio:159, img:"https://images.unsplash.com/photo-1586190848861-99aa4a171e90?auto=format&fit=crop&w=800&q=80", emoji:"🍔",
+    descripcion:"Jalapeños, pepper jack y salsa habanera para valientes.",
+    ingredientes:[["🍞","Pan brioche"],["🥩","Carne de res 150 g"],["🧀","Queso pepper jack"],["🌶️","Jalapeños"],["🧅","Cebolla morada"],["🔥","Salsa habanera"]],
+    layers:["bunBot","sauce","patty","cheese","jalapeno","onion","lettuce","bunTop"],
+    tags:["picante"], calorias:700, alergenos:"Gluten, lácteos", tiempo:"10 min", custom:true },
+  { nombre:"Hamburguesa Veggie", categoria:"hamburguesas", precio:135, img:"https://images.unsplash.com/photo-1520072959219-c595dc870360?auto=format&fit=crop&w=800&q=80", emoji:"🍔",
+    descripcion:"Medallón de garbanzo y quinoa con aguacate.",
+    ingredientes:[["🍞","Pan integral"],["🌱","Medallón de garbanzo"],["🥑","Aguacate"],["🥬","Lechuga"],["🍅","Jitomate"],["🧅","Cebolla morada"]],
+    layers:["bunBot","veggie","avocado","onion","tomato","lettuce","bunTop"],
+    tags:["veg","nuevo"], calorias:540, alergenos:"Gluten", tiempo:"10 min", custom:true },
+
+  // ---------- COMBOS ----------
+  { nombre:"Combo Clásico", categoria:"combos", precio:169, img:"https://images.unsplash.com/photo-1561758033-d89a9ad46330?auto=format&fit=crop&w=800&q=80", emoji:"🍱",
+    descripcion:"Hamburguesa clásica, papas medianas y refresco.",
+    ingredientes:[["🍔","Hamburguesa Clásica"],["🍟","Papas medianas"],["🥤","Refresco 500 ml"]],
+    stack:["🍔","🍟","🥤"], tags:["vendido"], calorias:1150, alergenos:"Gluten, lácteos", tiempo:"12 min" },
+  { nombre:"Combo Doble", categoria:"combos", precio:199, img:"https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=800&q=80", emoji:"🍱",
+    descripcion:"Doble queso, papas grandes y refresco grande.",
+    ingredientes:[["🍔","Hamburguesa Doble Queso"],["🍟","Papas grandes"],["🥤","Refresco 750 ml"]],
+    stack:["🍔","🍟","🥤"], tags:[], calorias:1600, alergenos:"Gluten, lácteos", tiempo:"14 min" },
+  { nombre:"Combo Pareja", categoria:"combos", precio:329, img:"https://images.unsplash.com/photo-1571091718767-18b5b1457add?auto=format&fit=crop&w=800&q=80", emoji:"🍱",
+    descripcion:"2 hamburguesas, papas para compartir y 2 refrescos.",
+    ingredientes:[["🍔","2 Hamburguesas Clásicas"],["🍟","Papas familiares"],["🥤","2 Refrescos"],["🧅","Aros de cebolla"]],
+    stack:["🍔","🍔","🍟","🥤"], tags:["nuevo"], calorias:2400, alergenos:"Gluten, lácteos", tiempo:"15 min" },
+  { nombre:"Combo Infantil", categoria:"combos", precio:119, img:"https://images.unsplash.com/photo-1572802419224-296b0aeee0d9?auto=format&fit=crop&w=800&q=80", emoji:"🍱",
+    descripcion:"Mini hamburguesa, papas chicas, jugo y sorpresa.",
+    ingredientes:[["🍔","Mini hamburguesa"],["🍟","Papas chicas"],["🧃","Jugo"],["🎁","Juguete sorpresa"]],
+    stack:["🍔","🍟","🧃","🎁"], tags:[], calorias:680, alergenos:"Gluten, lácteos", tiempo:"10 min" },
+
+  // ---------- PAPAS Y SNACKS ----------
+  { nombre:"Papas a la Francesa", categoria:"snacks", precio:49, img:"https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=800&q=80", emoji:"🍟",
+    descripcion:"Crujientes, doradas y con sal de mar.",
+    ingredientes:[["🥔","Papa natural"],["🧂","Sal de mar"]], stack:["🍟","🧂"],
+    tags:["veg"], calorias:380, alergenos:"Ninguno", tiempo:"6 min" },
+  { nombre:"Papas Gajo con Queso", categoria:"snacks", precio:79, img:"https://images.unsplash.com/photo-1585109649139-366815a0d713?auto=format&fit=crop&w=800&q=80", emoji:"🍟",
+    descripcion:"Gajos sazonados bañados en queso cheddar y tocino.",
+    ingredientes:[["🥔","Papas gajo"],["🧀","Queso cheddar"],["🥓","Tocino"],["🌿","Cebollín"]], stack:["🌿","🥓","🧀","🥔"],
+    tags:["vendido"], calorias:640, alergenos:"Lácteos", tiempo:"8 min" },
+  { nombre:"Aros de Cebolla", categoria:"snacks", precio:65, img:"https://images.unsplash.com/photo-1639024471283-03518883512d?auto=format&fit=crop&w=800&q=80", emoji:"🧅",
+    descripcion:"Empanizados crujientes con aderezo ranch.",
+    ingredientes:[["🧅","Cebolla blanca"],["🍞","Empanizado"],["🥛","Aderezo ranch"]], stack:["🧅","🍞","🥛"],
+    tags:["veg"], calorias:450, alergenos:"Gluten, lácteos", tiempo:"7 min" },
+  { nombre:"Alitas Búfalo (8 pz)", categoria:"snacks", precio:139, img:"https://images.unsplash.com/photo-1608039755401-742074f0548d?auto=format&fit=crop&w=800&q=80", emoji:"🍗",
+    descripcion:"Alitas bañadas en salsa búfalo con apio y blue cheese.",
+    ingredientes:[["🍗","8 alitas"],["🔥","Salsa búfalo"],["🥬","Apio"],["🧀","Aderezo blue cheese"]], stack:["🔥","🍗","🥬","🧀"],
+    tags:["picante"], calorias:820, alergenos:"Lácteos", tiempo:"14 min" },
+
+  // ---------- BEBIDAS ----------
+  { nombre:"Refresco", categoria:"bebidas", precio:35, img:"https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=800&q=80", emoji:"🥤",
+    descripcion:"De cola, lima-limón o naranja, 500 ml.",
+    ingredientes:[["🥤","Refresco 500 ml"],["🧊","Hielo"]], stack:["🧊","🥤"],
+    tags:[], calorias:210, alergenos:"Ninguno", tiempo:"1 min" },
+  { nombre:"Malteada de Vainilla", categoria:"bebidas", precio:75, img:"https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=800&q=80", emoji:"🥤",
+    descripcion:"Helado de vainilla, leche y crema batida.",
+    ingredientes:[["🍦","Helado de vainilla"],["🥛","Leche entera"],["🍒","Cereza"],["☁️","Crema batida"]], stack:["🍒","☁️","🍦","🥛"],
+    tags:["vendido"], calorias:560, alergenos:"Lácteos", tiempo:"4 min" },
+  { nombre:"Limonada Natural", categoria:"bebidas", precio:39, img:"https://images.unsplash.com/photo-1621263764928-df1444c5e859?auto=format&fit=crop&w=800&q=80", emoji:"🍋",
+    descripcion:"Recién exprimida, natural o mineral.",
+    ingredientes:[["🍋","Limón fresco"],["💧","Agua natural o mineral"],["🌿","Hierbabuena"]], stack:["🌿","🍋","💧"],
+    tags:["veg"], calorias:120, alergenos:"Ninguno", tiempo:"3 min" },
+  { nombre:"Cerveza Artesanal", categoria:"bebidas", precio:79, img:"https://images.unsplash.com/photo-1608270586620-248524c67de9?auto=format&fit=crop&w=800&q=80", emoji:"🍺",
+    descripcion:"Selección local de temporada, 355 ml.",
+    ingredientes:[["🍺","Cerveza 355 ml"],["🌾","Malta y lúpulo"]], stack:["🍺","🌾"],
+    tags:["nuevo"], calorias:180, alergenos:"Gluten", tiempo:"1 min" },
+
+  // ---------- POSTRES ----------
+  { nombre:"Brownie con Helado", categoria:"postres", precio:79, img:"https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=800&q=80", emoji:"🍫",
+    descripcion:"Brownie tibio con helado de vainilla y chocolate.",
+    ingredientes:[["🍫","Brownie de chocolate"],["🍦","Helado de vainilla"],["🍯","Jarabe de chocolate"]], stack:["🍯","🍦","🍫"],
+    tags:["vendido"], calorias:620, alergenos:"Gluten, lácteos, huevo", tiempo:"5 min" },
+  { nombre:"Pay de Queso", categoria:"postres", precio:69, img:"https://images.unsplash.com/photo-1533134242443-d4fd215305ad?auto=format&fit=crop&w=800&q=80", emoji:"🍰",
+    descripcion:"Cremoso estilo New York con mermelada de fresa.",
+    ingredientes:[["🧀","Queso crema"],["🍪","Base de galleta"],["🍓","Mermelada de fresa"]], stack:["🍓","🧀","🍪"],
+    tags:[], calorias:480, alergenos:"Gluten, lácteos, huevo", tiempo:"2 min" },
+  { nombre:"Churros con Cajeta", categoria:"postres", precio:59, img:"https://images.unsplash.com/photo-1624371414361-e670edf4898d?auto=format&fit=crop&w=800&q=80", emoji:"🥖",
+    descripcion:"5 churros con azúcar y canela, con cajeta.",
+    ingredientes:[["🥖","5 churros"],["🍬","Azúcar y canela"],["🍯","Cajeta"]], stack:["🍬","🥖","🍯"],
+    tags:["nuevo"], calorias:520, alergenos:"Gluten, lácteos", tiempo:"6 min" },
+  { nombre:"Sundae de Fresa", categoria:"postres", precio:55, img:"https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=800&q=80", emoji:"🍨",
+    descripcion:"Helado suave, fresas frescas y nuez.",
+    ingredientes:[["🍨","Helado suave"],["🍓","Fresas"],["🥜","Nuez picada"]], stack:["🥜","🍓","🍨"],
+    tags:["veg"], calorias:390, alergenos:"Lácteos, nueces", tiempo:"3 min" },
+];
+/* ====================== FIN DE LOS DATOS ====================== */
+
+const TAG_INFO = { picante:["picante","Picante 🌶"], vendido:["vendido","Más vendido ⭐"], nuevo:["nuevo","Nuevo ✨"], veg:["veg","Vegetariano 🌱"] };
+const CAPAS = { bunBot:"Pan", patty:"Carne", chicken:"Pollo", veggie:"Medallón", cheese:"Queso", bacon:"Tocino", lettuce:"Lechuga",
+  tomato:"Jitomate", onion:"Cebolla", pickles:"Pepinillos", jalapeno:"Jalapeños", sauce:"Salsa", avocado:"Aguacate", bunTop:"Pan" };
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = s => document.querySelector(s);
+const money = n => '$' + Math.round(n).toLocaleString('es-MX');
+
+function placeholder(p){
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'><defs><radialGradient id='g' cx='50%' cy='55%'><stop offset='0' stop-color='#4a2210'/><stop offset='1' stop-color='#1a0e07'/></radialGradient></defs><rect width='400' height='300' fill='url(#g)'/><text x='200' y='180' font-size='130' text-anchor='middle'>${p.emoji||'🍔'}</text></svg>`;
+  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+}
+const imgOf = p => p.img || placeholder(p);
+/* si una foto no carga, se muestra el placeholder */
+document.addEventListener("error", e => { const t=e.target; if(t.tagName==="IMG" && !t.dataset.fb){ t.dataset.fb=1; const p=PRODUCTOS.find(x=>x.nombre===t.alt); if(p) t.src=placeholder(p);} }, true);
+const tagsHTML = t => (t||[]).map(k => TAG_INFO[k] ? `<span class="tag ${TAG_INFO[k][0]}">${TAG_INFO[k][1]}</span>` : '').join('');
+
+/* ---------- Accesibilidad: capas modales ---------- */
+const fondo=()=>[$('#main'),$('#cart')];
+function abrirCapa(el){ fondo().forEach(f=>{ try{f.inert=true}catch(e){} }); }
+function cerrarCapa(el){ if(!$('#overlay').classList.contains('open')&&!$('#drawer').classList.contains('open')) fondo().forEach(f=>{ try{f.inert=false}catch(e){} }); }
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Tab') return;
+  const capa=$('#drawer.open')||($('#overlay.open')&&$('#modal')); if(!capa) return;
+  const f=[...capa.querySelectorAll('button,input,select,textarea,summary,[tabindex]:not([tabindex="-1"])')].filter(x=>x.offsetParent!==null&&!x.disabled);
+  if(!f.length) return; const a=f[0], z=f[f.length-1];
+  if(e.shiftKey&&document.activeElement===a){ e.preventDefault(); z.focus(); }
+  else if(!e.shiftKey&&document.activeElement===z){ e.preventDefault(); a.focus(); }
+});
+
+/* ---------- Pestañas y tarjetas ---------- */
+let catActual = CATEGORIAS[0].id;
+function renderTabs(){
+  $('#tabs').innerHTML = CATEGORIAS.map(c =>
+    `<button class="tab ${c.id===catActual?'active':''}" role="tab" aria-selected="${c.id===catActual}" aria-controls="grid" tabindex="${c.id===catActual?0:-1}" data-cat="${c.id}">${c.nombre}</button>`).join('');
+}
+function renderGrid(){
+  const lista = PRODUCTOS.map((p,i)=>({...p,_i:i})).filter(p=>p.categoria===catActual);
+  $('#grid').innerHTML = `<h2 class="sr-only">${CATEGORIAS.find(c=>c.id===catActual).nombre}</h2>` + lista.map((p,n) => `
+    <article class="card${n===0?' feat':''}" tabindex="0" data-i="${p._i}" style="animation-delay:${n*90}ms">${n===0?'<span class="feat-badge">La favorita de la casa</span>':''}
+      <div class="img-wrap"><img src="${imgOf(p)}" alt="${p.nombre}" loading="lazy"></div>
+      ${n===0?'':`<div class="tags">${tagsHTML(p.tags)}</div>`}
+      <h3>${p.nombre}</h3>
+      <p>${p.descripcion}</p>
+      <div class="bottom"><div class="price">${money(p.precio)}<small>MXN</small></div><button class="btn-det">Ver detalles</button></div>
+    </article>`).join('');
+}
+$('#tabs').addEventListener('keydown', e => {
+  if(!['ArrowRight','ArrowLeft','Home','End'].includes(e.key)) return; e.preventDefault();
+  const i=CATEGORIAS.findIndex(c=>c.id===catActual), n=CATEGORIAS.length;
+  const j=e.key==='Home'?0:e.key==='End'?n-1:(i+(e.key==='ArrowRight'?1:-1)+n)%n;
+  catActual=CATEGORIAS[j].id; renderTabs(); renderGrid(); $('#tabs .active').focus();
+});
+$('#tabs').addEventListener('click', e => {
+  const b = e.target.closest('.tab'); if(!b) return;
+  catActual = b.dataset.cat; renderTabs(); renderGrid();
+});
+$('#grid').addEventListener('click', e => { const c = e.target.closest('.card'); if(c) abrir(+c.dataset.i, c); });
+$('#grid').addEventListener('keydown', e => { if((e.key==='Enter'||e.key===' ') && e.target.classList.contains('card')){ e.preventDefault(); abrir(+e.target.dataset.i, e.target);} });
+
+/* ---------- Modal ---------- */
+let actual = null, cantidad = 1, totalMostrado = 0, ultimoFoco = null;
+
+const EXTRA_CAPA={"Queso extra":"cheese","Tocino":"bacon","Aguacate":"avocado","Jalapeños":"jalapeno","Huevo estrellado":"egg",
+ "Aros de cebolla":"onion","Champiñones":"mushroom","Piña asada":"pineapple","Cebolla caramelizada":"onion","Chile chipotle":"sauce",
+ "Carne extra 150 g":"patty","Salsa de queso":"cheese"};
+Object.assign(CAPAS,{egg:"Huevo",mushroom:"Champiñones",pineapple:"Piña"});
+const FRASES={"Queso extra":"Más queso, más felicidad 🧀","Tocino":"El tocino nunca sobra 🥓","Jalapeños":"¡Eso pica! 🔥","Carne extra 150 g":"Modo bestia activado 💪",
+ "Huevo estrellado":"Con huevito, como en casa 🍳","Piña asada":"Equipo piña, sin pena 🍍","Aguacate":"Oro verde ✨","Sin cebolla":"Anotado, cero cebolla 👌"};
+function capasActuales(){
+  const p=actual; if(!p.layers) return null;
+  let L=[...p.layers]; const m=$('#modal');
+  const sz=m.querySelector('input[name=size]:checked'), lvl=sz?OPCIONES.tamanos.findIndex(t=>t.nombre===sz.dataset.n):0;
+  const prot=L.find(l=>['patty','chicken','veggie'].includes(l))||'patty';
+  let at=L.lastIndexOf(prot)+1;
+  for(let k=0;k<lvl;k++){ L.splice(at,0,prot,'cheese'); at+=2; }
+  const extra=[...m.querySelectorAll('.opt:checked')].map(o=>o.dataset.n);
+  if(extra.includes('Sin cebolla')) L=L.filter(l=>l!=='onion');
+  extra.forEach(n=>{ const c=EXTRA_CAPA[n]; if(c){ L.splice(L.length-1,0,c); } });
+  return L;
+}
+let capasPrevias=[];
+function pintarStack(){
+  const s=$('#stack'); const L=capasActuales(); if(!s||!L) return;
+  const cnt={}, prev={}; capasPrevias.forEach(l=>prev[l]=(prev[l]||0)+1);
+  s.innerHTML=L.map((l,i)=>{ cnt[l]=(cnt[l]||0)+1; const nuevo=cnt[l]>(prev[l]||0)&&capasPrevias.length;
+    return `<div class="layer l-${l}${nuevo?' new':''}" style="--i:${i};z-index:${i}"><span class="lbl">${CAPAS[l]||''}</span></div>`; }).join('');
+  s.style.paddingTop=Math.max(0,(L.length-9)*30)+'px';
+  capasPrevias=L;
+}
+function visualHTML(p){
+  if(p.layers){
+    return `<div class="stack" id="stack">${p.layers.map((l,i)=>
+      `<div class="layer l-${l}" style="--i:${i};z-index:${i}"><span class="lbl">${CAPAS[l]||''}</span></div>`).join('')}</div>`;
+  }
+  return `<div class="emoji-stack" id="stack">${(p.stack||[p.emoji]).map(e=>`<div>${e}</div>`).join('')}</div>`;
+}
+
+function abrir(i, cardEl){
+  actual = PRODUCTOS[i]; cantidad = 1; ultimoFoco = cardEl;
+  const p = actual;
+  const extraHTML = x=>`<label><input type="checkbox" class="opt" data-n="${x.nombre}" value="${x.precio}"><span>${x.emoji} ${x.nombre}<em>${x.precio?"+"+money(x.precio):"Gratis"}</em></span></label>`;
+  const custom = p.custom ? `
+    <div class="sect">Tamaño</div>
+    <div class="sizes">${OPCIONES.tamanos.map((t,k)=>`
+      <label><input type="radio" name="size" data-n="${t.nombre}" value="${t.extra}" ${k===0?'checked':''}><span>${t.nombre}<small>${t.extra?'+'+money(t.extra):'Incluido'}</small></span></label>`).join('')}</div>
+    <div class="sect">Extras</div>
+    <div class="extras">${OPCIONES.extras.slice(0,EXTRAS_VISIBLES).map(extraHTML).join('')}
+      ${OPCIONES.extras.length>EXTRAS_VISIBLES?`<details class="more"><summary>Ver más extras (${OPCIONES.extras.length-EXTRAS_VISIBLES})</summary><div class="extras">${OPCIONES.extras.slice(EXTRAS_VISIBLES).map(extraHTML).join('')}</div></details>`:''}
+      <label class="combo"><input type="checkbox" class="opt" data-n="Combo (papas + refresco)" value="${OPCIONES.combo.precio}"><span>🍟🥤 ${OPCIONES.combo.nombre}<em>+${money(OPCIONES.combo.precio)}</em></span></label>
+    </div>` : '';
+
+  $('#modal').innerHTML = `
+    <button class="close" id="close" aria-label="Cerrar">✕</button>
+    <div class="m-visual">
+      <img class="m-photo" src="${imgOf(p)}" alt="${p.nombre}">
+      ${visualHTML(p)}
+      <div class="m-hint">${p.layers?'Así está hecha':'Lo que incluye'}</div>
+    </div>
+    <div class="m-info">
+      <h2 id="mName">${p.nombre}</h2>
+      <p class="desc">${p.descripcion}</p>
+      <div class="m-tags">${tagsHTML(p.tags)}</div>
+      <div class="sect">Ingredientes</div>
+      <ul class="ings">${p.ingredientes.map(([e,n],k)=>`<li style="animation-delay:${300+k*60}ms"><span>${e}</span>${n}</li>`).join('')}</ul>
+      <p class="facts-line"><span>🔥 ~${p.calorias} kcal</span><span>⏱️ ${p.tiempo}</span><span>⚠️ ${p.alergenos}</span></p>
+      ${custom}
+      <div class="buy">
+        <div class="total"><small>Total</small><span id="total">${money(p.precio)}</span><span class="sizzle" id="sizzle" aria-live="polite"></span></div>
+        <div class="qty"><button id="menos" aria-label="Menos">−</button><output id="cant">1</output><button id="mas" aria-label="Más">+</button></div>
+        <button class="add" id="add">Agregar al pedido</button>
+      </div>
+    </div>`;
+
+  // zoom desde la tarjeta
+  const r = cardEl.getBoundingClientRect();
+  const m = $('#modal');
+  const mw = Math.min(1000, innerWidth-40), mh = Math.min(innerHeight*.92, 700);
+  m.style.setProperty('--ox', (r.left + r.width/2 - (innerWidth-mw)/2) + 'px');
+  m.style.setProperty('--oy', (r.top + r.height/2 - (innerHeight-mh)/2) + 'px');
+
+  totalMostrado = p.precio;
+  $('#overlay').classList.add('open'); abrirCapa($('#overlay'));
+  document.body.classList.add('lock');
+  m.scrollTop = 0;
+  capasPrevias=[]; pintarStack();
+  setTimeout(()=>{ const s=$('#stack'); s && s.classList.add('exploded'); }, reduceMotion?0:550);
+  $('#close').focus();
+
+  $('#close').onclick = cerrar;
+  $('#mas').onclick = () => { cantidad = Math.min(20, cantidad+1); actualizar(); };
+  $('#menos').onclick = () => { cantidad = Math.max(1, cantidad-1); actualizar(); };
+  m.querySelectorAll('input').forEach(inp => inp.onchange = ()=>{ actualizar(); pintarStack(); const z=$('#sizzle'); if(z){ z.textContent = inp.checked && FRASES[inp.dataset.n] || (inp.name==='size' && inp.dataset.n==='Triple' ? 'Necesitarás las dos manos 🙌' : ''); } });
+  $('#add').onclick = agregar;
+}
+
+function calcular(){
+  let unit = actual.precio;
+  const s = $('#modal').querySelector('input[name=size]:checked'); if(s) unit += +s.value;
+  $('#modal').querySelectorAll('.opt:checked').forEach(o => unit += +o.value);
+  return unit * cantidad;
+}
+function actualizar(){ $('#cant').textContent = cantidad; contar(calcular()); }
+
+let rafId;
+function contar(destino){
+  cancelAnimationFrame(rafId);
+  const el = $('#total'), desde = totalMostrado, t0 = performance.now(), dur = reduceMotion?1:450;
+  const paso = t => {
+    const k = Math.min(1,(t-t0)/dur), e = 1-Math.pow(1-k,3);
+    totalMostrado = desde + (destino-desde)*e;
+    el.textContent = money(totalMostrado);
+    if(k<1) rafId = requestAnimationFrame(paso);
+  };
+  rafId = requestAnimationFrame(paso);
+}
+
+function cerrar(){
+  $('#overlay').classList.remove('open'); cerrarCapa($('#overlay'));
+  if(!$('#drawer').classList.contains('open')) document.body.classList.remove('lock');
+  ultimoFoco && ultimoFoco.focus();
+}
+$('#overlay').addEventListener('click', e => { if(e.target.id==='overlay') cerrar(); });
+document.addEventListener('keydown', e => { if(e.key==='Escape' && $('#overlay').classList.contains('open')) cerrar(); });
+
+/* ---------- Carrito ---------- */
+let carrito=[]; try{carrito=JSON.parse(localStorage.getItem('carritoBurger'))||[]}catch(e){}
+function agregar(){
+  const btn = $('#add'); if(btn.classList.contains('ok')) return;
+  const m=$('#modal'), sz=m.querySelector('input[name=size]:checked');
+  const opts=[...m.querySelectorAll('.opt:checked')].map(o=>o.dataset.n);
+  const unit=calcular()/cantidad;
+  const key=actual.nombre+'|'+(sz?sz.dataset.n:'')+'|'+opts.join(',');
+  const ex=carrito.find(x=>x.key===key);
+  if(ex) ex.cant+=cantidad; else carrito.push({key,nombre:actual.nombre,img:imgOf(actual),tamano:sz?sz.dataset.n:'',opts,unit,cant:cantidad});
+  guardar(); pintarCarrito();
+  btn.classList.add('ok'); btn.innerHTML = '<span class="check">✓</span> ¡Agregado!';
+  if(!reduceMotion){
+    for(let i=0;i<16;i++){
+      const s=document.createElement('span'); s.className='burst';
+      const a=Math.random()*Math.PI*2, d=40+Math.random()*50;
+      s.style.setProperty('--bx',Math.cos(a)*d+'px'); s.style.setProperty('--by',Math.sin(a)*d+'px');
+      btn.appendChild(s); setTimeout(()=>s.remove(),750);
+    }
+  }
+  if(!reduceMotion){
+    const src=$('#modal .m-photo'), r=src.getBoundingClientRect(), c=$('#cart').getBoundingClientRect();
+    const f=document.createElement('img'); f.className='flyer'; f.src=src.src; f.alt='';
+    f.style.left=(r.left+r.width/2-35)+'px'; f.style.top=(r.top+r.height/2-35)+'px'; document.body.appendChild(f);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{ f.style.transform=`translate(${c.left+c.width/2-(r.left+r.width/2)}px,${c.top+c.height/2-(r.top+r.height/2)}px) scale(.2) rotate(540deg)`; f.style.opacity='.4'; }));
+    setTimeout(()=>f.remove(),800);
+  }
+  try{ navigator.vibrate && navigator.vibrate([18,40,18]); }catch(e){}
+  const cart=$('#cart');
+  cart.classList.remove('bump'); void cart.offsetWidth; cart.classList.add('bump');
+  const t=$('#toast'); t.textContent=`🔥 ${cantidad} × ${actual.nombre} ¡directo a la parrilla!`; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2000);
+  setTimeout(()=>{ btn.classList.remove('ok'); btn.textContent='Agregar al pedido'; },1600);
+}
+
+/* ---------- Panel del carrito y WhatsApp ---------- */
+function guardar(){ try{localStorage.setItem('carritoBurger',JSON.stringify(carrito))}catch(e){} }
+const esDomicilio=()=>document.querySelector('input[name=modo]:checked').value==='Envío a domicilio';
+function pintarCarrito(){
+  const n=carrito.reduce((a,x)=>a+x.cant,0); $('#count').textContent=n;
+  const box=$('#dItems');
+  if(!carrito.length){ box.innerHTML='<div class="d-empty"><div>🍔</div>La parrilla está lista, pero tu carrito está vacío.<br>¡Échale algo rico!</div>'; $('#dFoot').hidden=true; return; }
+  $('#dFoot').hidden=false;
+  box.innerHTML=carrito.map((x,i)=>`
+    <div class="d-item"><img src="${x.img}" alt="">
+      <div><h4>${x.nombre}</h4>${x.tamano?`<small>Tamaño: ${x.tamano}</small>`:''}${x.opts.length?`<small>+ ${x.opts.join(', ')}</small>`:''}<small>${money(x.unit)} c/u</small></div>
+      <div class="r"><b>${money(x.unit*x.cant)}</b>
+        <div class="mini"><button data-a="-" data-i="${i}" aria-label="Menos">−</button><span>${x.cant}</span><button data-a="+" data-i="${i}" aria-label="Más">+</button></div>
+        <button class="del" data-a="x" data-i="${i}">Quitar</button></div></div>`).join('');
+  const sub=carrito.reduce((a,x)=>a+x.unit*x.cant,0), env=esDomicilio()?COSTO_ENVIO:0;
+  $('#dSub').textContent=money(sub); $('#dEnv').textContent=env?money(env):'Gratis'; $('#dEnvRow').hidden=!esDomicilio();
+  $('#dTot').textContent=money(sub+env); $('#cDir').hidden=!esDomicilio();
+}
+$('#dItems').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b) return; const x=carrito[b.dataset.i];
+  if(b.dataset.a==='+') x.cant++; else if(b.dataset.a==='-') x.cant>1?x.cant--:carrito.splice(b.dataset.i,1); else carrito.splice(b.dataset.i,1);
+  guardar(); pintarCarrito();
+});
+document.querySelectorAll('input[name=modo]').forEach(r=>r.onchange=pintarCarrito);
+function abrirCarrito(){ pintarCarrito(); $('#drawer').classList.add('open'); $('#drawerBg').classList.add('open'); abrirCapa($('#drawer')); setTimeout(()=>$('#dClose').focus(),50); document.body.classList.add('lock'); }
+function cerrarCarrito(){ $('#drawer').classList.remove('open'); $('#drawerBg').classList.remove('open'); cerrarCapa($('#drawer')); $('#cart').focus(); if(!$('#overlay').classList.contains('open')) document.body.classList.remove('lock'); }
+$('#cart').onclick=abrirCarrito; $('#dClose').onclick=cerrarCarrito; $('#drawerBg').onclick=cerrarCarrito;
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&$('#drawer').classList.contains('open')) cerrarCarrito(); });
+$('#vaciar').onclick=()=>{ carrito=[]; guardar(); pintarCarrito(); };
+$('#wa').onclick=()=>{
+  const nom=$('#cNombre').value.trim(), dir=$('#cDir').value.trim(), dom=esDomicilio();
+  if(!nom){ $('#dErr').textContent='Escribe tu nombre.'; $('#cNombre').focus(); return; }
+  if(dom&&!dir){ $('#dErr').textContent='Escribe tu dirección de entrega.'; $('#cDir').focus(); return; }
+  $('#dErr').textContent='';
+  const sub=carrito.reduce((a,x)=>a+x.unit*x.cant,0), env=dom?COSTO_ENVIO:0;
+  let t=`🍔 *NUEVO PEDIDO – ${NEGOCIO}*\n\n`;
+  carrito.forEach(x=>{ t+=`▪️ *${x.cant}× ${x.nombre}*${x.tamano?` (${x.tamano})`:''} — ${money(x.unit*x.cant)}\n`; if(x.opts.length) t+=`    + ${x.opts.join(', ')}\n`; });
+  t+=`\nSubtotal: ${money(sub)}\n`; if(dom) t+=`Envío: ${env?money(env):'Gratis'}\n`; t+=`*TOTAL: ${money(sub+env)} MXN*\n\n`;
+  t+=`👤 Nombre: ${nom}\n`; if($('#cTel').value.trim()) t+=`📞 Teléfono: ${$('#cTel').value.trim()}\n`;
+  t+=`📦 Entrega: ${dom?'Envío a domicilio':'Recoger en sucursal'}\n`; if(dom) t+=`📍 Dirección: ${dir}\n`;
+  t+=`💳 Pago: ${$('#cPago').value}\n`; if($('#cPaga').value.trim()) t+=`💵 Paga con: $${$('#cPaga').value.trim()}\n`;
+  if($('#cNotas').value.trim()) t+=`📝 Notas: ${$('#cNotas').value.trim()}\n`;
+  window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(t)}`,'_blank');
+};
+pintarCarrito();
+
+
+/* ---------- Chispas ---------- */
+function chispas(){
+  if(reduceMotion) return;
+  const cont=$('#sparks'), n = innerWidth<600 ? 10 : 24;
+  for(let i=0;i<n;i++){
+    const s=document.createElement('span'); s.className='spark';
+    const size=2+Math.random()*3;
+    s.style.cssText=`left:${Math.random()*100}%;width:${size}px;height:${size}px;--dx:${(Math.random()-.5)*160}px;animation-duration:${6+Math.random()*8}s;animation-delay:${-Math.random()*14}s`;
+    cont.appendChild(s);
+  }
+}
+
+(function(){ const h=new Date().getHours(), ab=h>=HORA_ABRE&&h<HORA_CIERRA, el=$('#status');
+  el.className='status '+(ab?'on':'off');
+  el.innerHTML=ab?`<i></i><span>Abierto ahora · Entrega en ${TIEMPO_ENTREGA} · ${ZONA_ENTREGA}</span>`:`<i></i><span>Cerrado · Abrimos a las ${HORA_ABRE}:00 h — puedes dejar tu pedido listo</span>`; })();
+renderTabs(); renderGrid(); chispas();
+</script>
+</body>
+</html>
